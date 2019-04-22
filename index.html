@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Router</title>
+<script>
+var URL = (IP) => `http://192.168.100.${IP}:88?time=${new Date().getTime()}`;
+var TIMEOUT = 100;
+if(localStorage.PRE){
+	request(localStorage.PRE, 1000).then(r=>{
+		if(!typeof r == 'string'){
+			localStorage.PRE = null;
+		}
+	});
+}
+function request(i, TIMEOUT = window.TIMEOUT) {
+	return new Promise((r, j) => {
+		var xhr = new XMLHttpRequest();
+		xhr.timeout = TIMEOUT;
+		xhr.onload = function (e) {
+			if (xhr.status == 200 || xhr.status == 304) {
+				var url = e.target.responseURL.split('?').shift();
+				localStorage.PRE = i;
+				location.href = url;
+				//r(url);
+			}
+		}
+		xhr.onerror = r;
+		xhr.ontimeout = r;
+		xhr.open('GET', URL(i));
+		xhr.send();
+	});
+}
+
+var h = [];
+async function run() {
+	var j = 1 + 1;
+	while (true) {
+		for (var i = 254; i > 0; i--) {
+			h.push(request(i));
+			if (h.length > 9 || i == 1) {
+				try{document.getElementsByTagName('h2')[0].innerHTML = `Current Try: ~ 192.168.100.${i} ~ `;}catch(e){}
+				await Promise.all(h);
+				h.length = 0;
+			}
+		}
+		try{document.getElementsByTagName('h1')[0].innerHTML = `Try: ${j++}`}catch(e){}
+		
+	}
+}
+run();
+</script>
+</head>
+<body style="text-align:center;">
+<h1>Try: 1</h1>
+<h2></h2>
+</body>
+</html>
